@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
   <rect width="128" height="128" rx="30" fill="#172238"/>
   <circle cx="64" cy="64" r="39" fill="#ff8a4c"/>
-  <path d="M77 35c-8-6-22-4-29 4-8 9-7 22 2 30l16 15c5 5 14 5 19 0s5-14 0-19L68 48c-2-2-2-5 0-7 2-2 5-2 7 0l9 9" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="64" y="79" fill="#fff" font-size="48" font-family="sans-serif" font-weight="700" text-anchor="middle">玲</text>
 </svg>

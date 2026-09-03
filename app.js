@@ -6,7 +6,10 @@ const initialTransactions = [
   { icon: '☕', iconClass: 'food', title: '咖啡', note: '餐饮美食 · 星巴克', date: '05月29日', amount: -32 }
 ];
 const chartData = [{income:420,expense:220},{income:680,expense:310},{income:320,expense:190},{income:780,expense:410},{income:540,expense:280},{income:910,expense:360},{income:760,expense:420}];
-let transactions = JSON.parse(localStorage.getItem('orange-ledger-transactions') || 'null') || initialTransactions;
+const STORAGE_KEY = 'lingyu-ledger-transactions';
+const legacyTransactions = localStorage.getItem('orange-ledger-transactions');
+let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY) || legacyTransactions || 'null') || initialTransactions;
+if (!localStorage.getItem(STORAGE_KEY) && legacyTransactions) localStorage.setItem(STORAGE_KEY, legacyTransactions);
 let selectedType = 'expense';
 let monthOffset = 0;
 
@@ -72,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const classMap = { '餐饮美食':'food','交通出行':'transport','购物消费':'shopping','居住生活':'living','工资收入':'salary' };
     const icons = { '餐饮美食':'🍜','交通出行':'🚇','购物消费':'🛍','居住生活':'⌂','工资收入':'↗','娱乐休闲':'♫','其他':'•' };
     transactions.unshift({ icon: icons[category] || '•', iconClass: classMap[category] || 'living', title: form.get('note') || category, note: `${category} · 手动记账`, date: '刚刚', amount: selectedType === 'expense' ? -amount : amount });
-    localStorage.setItem('orange-ledger-transactions', JSON.stringify(transactions));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
     renderTransactions();
     closeModal();
     showToast('账单已保存');

@@ -1,6 +1,6 @@
 {
-  "name": "橙子账本 · 个人账单管家",
-  "short_name": "橙子账本",
+  "name": "玲钰记账 · 个人账单管家",
+  "short_name": "玲钰记账",
   "description": "记录收入与支出，掌握每一笔生活开销。",
   "start_url": "./",
   "display": "standalone",

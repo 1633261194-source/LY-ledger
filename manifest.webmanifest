@@ -1,0 +1,13 @@
+{
+  "name": "橙子账本 · 个人账单管家",
+  "short_name": "橙子账本",
+  "description": "记录收入与支出，掌握每一笔生活开销。",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6f8fb",
+  "theme_color": "#172238",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

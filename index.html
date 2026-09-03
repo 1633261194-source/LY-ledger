@@ -7,27 +7,24 @@
     <meta name="theme-color" content="#f6f8fb" />
     <meta name="description" content="记录收入与支出，掌握每一笔生活开销。" />
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="icon" href="icon.svg" type="image/svg+xml" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="icon" href="assets/character-avatar.png" type="image/png" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand">
-          <div class="brand-mark">玲</div>
+          <div class="brand-mark"><img src="assets/character-avatar.png" alt="" /></div>
           <div>
             <div class="brand-name">玲钰记账</div>
-            <div class="brand-subtitle">Personal finance</div>
+            <div class="brand-subtitle">每天记一点，安心多一点</div>
           </div>
         </div>
 
         <nav class="main-nav" aria-label="主导航">
           <div class="nav-label">工作台</div>
           <button class="nav-item active" data-section="overview"><span class="nav-icon">⌂</span><span>总览</span></button>
-          <button class="nav-item" data-section="transactions"><span class="nav-icon">≡</span><span>账单明细</span><span class="nav-count">12</span></button>
+          <button class="nav-item" data-section="transactions"><span class="nav-icon">≡</span><span>账单明细</span><span class="nav-count">0</span></button>
           <button class="nav-item" data-section="budgets"><span class="nav-icon">◒</span><span>预算规划</span></button>
           <button class="nav-item" data-section="insights"><span class="nav-icon">↗</span><span>消费分析</span></button>
           <div class="nav-label nav-label-spaced">管理</div>
@@ -43,7 +40,7 @@
 
       <main class="main-content">
         <header class="topbar">
-          <div class="mobile-brand"><div class="brand-mark">玲</div><span>玲钰记账</span></div>
+          <div class="mobile-brand"><div class="brand-mark"><img src="assets/character-avatar.png" alt="" /></div><span>玲钰记账</span></div>
           <div class="breadcrumb"><span>工作台</span><span class="breadcrumb-separator">/</span><strong id="currentSection">总览</strong></div>
           <div class="top-actions">
             <button class="icon-button" title="搜索账单" aria-label="搜索账单" id="searchToggle">⌕</button>
@@ -53,77 +50,159 @@
         </header>
 
         <div class="content-wrap">
+          <div class="view active" id="overviewView">
           <section class="page-intro">
             <div>
-              <p class="eyebrow">2024年 06月 · 周一</p>
-              <h1>早上好，林小满 <span class="wave">✦</span></h1>
-              <p class="intro-copy">这是你本月的财务快照，保持节奏，稳稳向前。</p>
+              <p class="eyebrow">TODAY'S LITTLE LEDGER</p>
+              <h1>早上好，林小满 <span class="wave">♡</span></h1>
+              <p class="intro-copy">小狗管家已经帮你整理好本月账单啦。</p>
             </div>
-            <div class="month-switcher"><button class="chevron" id="prevMonth">‹</button><button class="month-label" id="monthLabel">2024年06月</button><button class="chevron" id="nextMonth">›</button></div>
+            <img class="welcome-dog" src="assets/character-main.png" alt="戴红色帽子的长耳角色" />
+            <div class="month-switcher"><button class="chevron" id="prevMonth" aria-label="上个月">‹</button><button class="month-label" id="monthLabel">2024年06月</button><button class="chevron" id="nextMonth" aria-label="下个月">›</button></div>
           </section>
 
           <section class="metric-grid" aria-label="财务概览">
             <article class="metric-card accent-blue">
-              <div class="metric-top"><span class="metric-label">本月结余</span><span class="metric-icon">↗</span></div>
-              <div class="metric-value" id="balanceValue">¥ 8,426<span>.50</span></div>
-              <div class="metric-foot"><span class="trend positive">↑ 12.8%</span><span>较上月</span><span class="sparkline blue">▁▂▃▅▆▅▇</span></div>
+              <div class="metric-top"><span class="metric-label">本月结余</span><span class="metric-icon">✿</span></div>
+              <div class="metric-value" id="balanceValue">¥ 0<span>.00</span></div>
+              <div class="metric-foot"><span>根据你的真实账单计算</span><span class="sparkline blue">▁▁▁▁▁▁▁</span></div>
             </article>
             <article class="metric-card accent-orange">
-              <div class="metric-top"><span class="metric-label">本月支出</span><span class="metric-icon">↘</span></div>
-              <div class="metric-value" id="expenseValue">¥ 3,574<span>.80</span></div>
-              <div class="metric-foot"><span class="trend negative">↓ 8.4%</span><span>较上月</span><span class="sparkline orange">▇▆▅▅▄▃▂</span></div>
+              <div class="metric-top"><span class="metric-label">本月支出</span><span class="metric-icon">♧</span></div>
+              <div class="metric-value" id="expenseValue">¥ 0<span>.00</span></div>
+              <div class="metric-foot"><span>根据你的真实账单计算</span><span class="sparkline orange">▁▁▁▁▁▁▁</span></div>
             </article>
             <article class="metric-card accent-green">
-              <div class="metric-top"><span class="metric-label">本月收入</span><span class="metric-icon">＋</span></div>
-              <div class="metric-value" id="incomeValue">¥ 12,001<span>.30</span></div>
-              <div class="metric-foot"><span class="trend positive">↑ 5.2%</span><span>较上月</span><span class="sparkline green">▂▃▄▅▅▆▇</span></div>
+              <div class="metric-top"><span class="metric-label">本月收入</span><span class="metric-icon">☀</span></div>
+              <div class="metric-value" id="incomeValue">¥ 0<span>.00</span></div>
+              <div class="metric-foot"><span>根据你的真实账单计算</span><span class="sparkline green">▁▁▁▁▁▁▁</span></div>
             </article>
             <article class="metric-card accent-purple">
-              <div class="metric-top"><span class="metric-label">储蓄率</span><span class="metric-icon">◎</span></div>
-              <div class="metric-value">70<span class="unit">%</span></div>
-              <div class="metric-foot"><span class="trend positive">↑ 3.6%</span><span>较上月</span><span class="mini-progress"><i></i></span></div>
+              <div class="metric-top"><span class="metric-label">储蓄率</span><span class="metric-icon">♡</span></div>
+              <div class="metric-value" id="savingsRateValue">0<span class="unit">%</span></div>
+              <div class="metric-foot"><span>收入减去支出</span><span class="mini-progress"><i id="savingsProgress" style="width:0"></i></span></div>
             </article>
           </section>
 
           <section class="main-grid">
             <article class="panel chart-panel">
               <div class="panel-header"><div><h2>收支趋势</h2><p>近 7 日资金流动</p></div><div class="legend"><span><i class="legend-dot income-dot"></i>收入</span><span><i class="legend-dot expense-dot"></i>支出</span><button class="more-button" title="更多操作">•••</button></div></div>
-              <div class="chart-summary"><strong id="weeklyTotal">¥ 2,680.00</strong><span>本周总流入</span><span class="trend positive">↑ 9.2%</span></div>
+              <div class="chart-summary"><strong id="weeklyTotal">¥ 0.00</strong><span>近 7 日总流入</span></div>
               <div class="chart" aria-label="近七日收支柱状图">
-                <div class="y-axis"><span>¥1,200</span><span>¥900</span><span>¥600</span><span>¥300</span><span>¥0</span></div>
+                <div class="y-axis" id="chartYAxis"><span>¥4</span><span>¥3</span><span>¥2</span><span>¥1</span><span>¥0</span></div>
                 <div class="plot"><div class="grid-lines"><i></i><i></i><i></i><i></i><i></i></div><div class="bars" id="bars"></div><div class="x-axis"><span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span></div></div>
               </div>
             </article>
 
             <article class="panel budget-panel">
               <div class="panel-header"><div><h2>预算执行</h2><p>本月各分类预算</p></div><button class="text-button" id="editBudgetBtn">编辑预算 <span>→</span></button></div>
-              <div class="budget-total"><div><span>已使用</span><strong>¥ 2,480.60</strong></div><div class="budget-total-right"><strong>¥ 5,000</strong><span>总预算</span></div></div>
-              <div class="budget-progress"><i></i></div>
-              <div class="budget-list">
-                <div class="budget-row"><div class="budget-info"><span class="category-dot food"></span><span>餐饮美食</span></div><span class="budget-amount">¥ 860 / ¥ 1,500</span><div class="row-progress"><i style="width:57%;background:#ff8a4c"></i></div></div>
-                <div class="budget-row"><div class="budget-info"><span class="category-dot transport"></span><span>交通出行</span></div><span class="budget-amount">¥ 342 / ¥ 600</span><div class="row-progress"><i style="width:57%;background:#5689e9"></i></div></div>
-                <div class="budget-row"><div class="budget-info"><span class="category-dot shopping"></span><span>购物消费</span></div><span class="budget-amount">¥ 628 / ¥ 1,000</span><div class="row-progress"><i style="width:63%;background:#a47bf3"></i></div></div>
-                <div class="budget-row"><div class="budget-info"><span class="category-dot living"></span><span>居住生活</span></div><span class="budget-amount">¥ 650 / ¥ 1,200</span><div class="row-progress"><i style="width:54%;background:#48b890"></i></div></div>
-              </div>
-              <button class="outline-button" id="viewBudgetBtn">查看完整预算 <span>→</span></button>
+              <div class="budget-empty"><img src="assets/character-avatar.png" alt="" /><strong>还没有设置预算</strong><span>从真实生活出发，给每类支出定个小目标。</span></div>
+              <button class="outline-button" id="viewBudgetBtn">设置第一份预算 <span>→</span></button>
             </article>
           </section>
 
           <section class="lower-grid">
             <article class="panel transactions-panel">
-              <div class="panel-header"><div><h2>最近账单</h2><p>共 <span id="transactionCount">12</span> 笔记录</p></div><button class="text-button" id="viewAllBtn">查看全部 <span>→</span></button></div>
+              <div class="panel-header"><div><h2>最近账单</h2><p>共 <span id="transactionCount">0</span> 笔记录</p></div><button class="text-button" id="viewAllBtn">查看全部 <span>→</span></button></div>
               <div class="transaction-list" id="transactionList"></div>
             </article>
             <article class="panel insight-panel">
               <div class="panel-header"><div><h2>消费洞察</h2><p>基于你的账单记录</p></div><span class="insight-icon">✧</span></div>
-              <div class="insight-highlight"><span class="insight-kicker">本月消费最高</span><strong>餐饮美食</strong><span class="insight-amount">¥ 860.00</span><div class="insight-bar"><i></i></div><p>占总支出的 <b>24.1%</b>，比上月少了 ¥120</p></div>
-              <div class="insight-tip"><span>✦</span><p><strong>小建议</strong><br />工作日午餐可以试试自带便当，本月预计可省 ¥180。</p></div>
+              <img class="insight-dog" src="assets/character-avatar.png" alt="戴红色帽子的长耳角色" />
+              <div id="insightContent"></div>
               <button class="outline-button insight-button" id="viewInsightBtn">查看详细分析 <span>→</span></button>
             </article>
+          </section>
+          </div>
+
+          <section class="view detail-view" id="transactionsView" hidden>
+            <div class="detail-hero">
+              <div>
+                <p class="eyebrow">EVERY LITTLE THING COUNTS</p>
+                <h1>账单明细 <span>✿</span></h1>
+                <p>认真记下每一笔，也是在认真照顾生活。</p>
+              </div>
+              <img src="assets/character-avatar.png" alt="戴红色帽子的长耳角色" />
+            </div>
+
+            <div class="detail-summary" aria-label="筛选结果汇总">
+              <article class="summary-note summary-income"><span>收入合计</span><strong id="detailIncome">¥ 0.00</strong><small>进账的小确幸</small></article>
+              <article class="summary-note summary-expense"><span>支出合计</span><strong id="detailExpense">¥ 0.00</strong><small>花在喜欢的生活里</small></article>
+              <article class="summary-note summary-balance"><span>筛选结余</span><strong id="detailBalance">¥ 0.00</strong><small>继续保持好节奏</small></article>
+            </div>
+
+            <article class="panel detail-panel">
+              <div class="detail-panel-head">
+                <div><h2>全部记录</h2><p>找到每一笔钱的去处</p></div>
+                <div class="detail-actions"><button class="outline-button clear-button" id="clearBillsBtn" title="清空全部账单"><span>⌫</span> 清空</button><button class="outline-button export-button" id="exportBillsBtn" title="导出当前筛选结果"><span>⇩</span> 导出 CSV</button></div>
+              </div>
+
+              <div class="filter-bar">
+                <label class="search-field"><span>⌕</span><input id="billSearch" type="search" placeholder="搜索备注、分类或账户" /></label>
+                <label class="select-field"><span>收支</span><select id="typeFilter"><option value="all">全部类型</option><option value="expense">只看支出</option><option value="income">只看收入</option></select></label>
+                <label class="select-field"><span>分类</span><select id="categoryFilter"><option value="all">全部分类</option></select></label>
+                <label class="select-field"><span>月份</span><select id="detailMonthFilter"><option value="all">全部月份</option></select></label>
+                <button class="reset-filter" id="resetFiltersBtn" title="清除筛选">↺</button>
+              </div>
+
+              <div class="list-meta"><span>共找到 <strong id="filteredCount">0</strong> 笔账单</span><span id="filterHint">按时间从近到远</span></div>
+              <div class="detail-list-head" aria-hidden="true"><span>账单</span><span>分类 / 账户</span><span>日期</span><span>金额</span><span>操作</span></div>
+              <div class="detail-list" id="detailTransactionList"></div>
+              <div class="empty-state" id="emptyState" hidden><img src="assets/character-avatar.png" alt="" /><strong>没有找到相关账单</strong><span>换个筛选条件试试看吧</span></div>
+              <div class="pagination"><button class="page-button" id="prevPageBtn" aria-label="上一页">‹</button><span id="pageInfo">第 1 / 1 页</span><button class="page-button" id="nextPageBtn" aria-label="下一页">›</button></div>
+            </article>
+          </section>
+
+          <section class="view feature-view" id="insightsView" hidden>
+            <div class="feature-hero analysis-hero">
+              <div><p class="eyebrow">KNOW YOUR SPENDING</p><h1>消费分析 <span>◎</span></h1><p>看懂每一笔支出，慢慢找到适合自己的生活节奏。</p></div>
+              <img src="assets/character-avatar.png" alt="戴红色帽子的长耳角色" />
+            </div>
+            <div class="feature-toolbar"><div><strong>分析月份</strong><span>所有结果均来自你的真实账单</span></div><select id="analysisMonthSelect" aria-label="选择分析月份"></select></div>
+            <div class="analysis-summary">
+              <article><span>支出总额</span><strong id="analysisExpense">¥ 0.00</strong><small>本月全部支出</small></article>
+              <article><span>日均支出</span><strong id="analysisAverage">¥ 0.00</strong><small>按有消费的日期计算</small></article>
+              <article><span>支出笔数</span><strong id="analysisCount">0 笔</strong><small>记录越完整，分析越准确</small></article>
+            </div>
+            <div class="analysis-grid">
+              <article class="panel donut-panel"><div class="section-heading"><div><h2>分类占比</h2><p>本月的钱主要花在哪里</p></div></div><div class="donut-wrap"><div class="donut-chart" id="categoryDonut"><div><strong>¥ 0</strong><span>总支出</span></div></div><div class="donut-legend" id="categoryLegend"></div></div></article>
+              <article class="panel weekly-panel"><div class="section-heading"><div><h2>每周趋势</h2><p>本月各周支出变化</p></div></div><div class="weekly-chart" id="weeklyAnalysisChart"></div></article>
+            </div>
+            <article class="panel ranking-panel"><div class="section-heading"><div><h2>消费排行榜</h2><p>按分类支出从高到低</p></div><span id="analysisRecordHint">0 笔有效记录</span></div><div class="ranking-list" id="categoryRanking"></div></article>
+          </section>
+
+          <section class="view feature-view" id="accountsView" hidden>
+            <div class="feature-hero accounts-hero">
+              <div><p class="eyebrow">MY MONEY POCKETS</p><h1>账户管理 <span>▣</span></h1><p>把现金、银行卡和支付账户整理在一起。</p></div>
+              <img src="assets/character-avatar.png" alt="戴红色帽子的长耳角色" />
+              <button class="primary-button hero-action" id="addAccountBtn"><span>＋</span>新增账户</button>
+            </div>
+            <div class="account-overview"><div><span>全部账户余额</span><strong id="totalAccountBalance">¥ 0.00</strong></div><div><span>账户数量</span><strong id="accountCount">0</strong></div><p>余额 = 初始余额 + 该账户的收入 - 支出</p></div>
+            <div class="account-grid" id="accountList"></div>
+            <div class="management-empty" id="accountEmpty"><img src="assets/character-avatar.png" alt="" /><strong>还没有账户</strong><span>添加现金、银行卡或支付账户，记账时就能选择钱从哪里来、花到哪里去。</span><button class="outline-button" id="emptyAddAccountBtn">新增第一个账户</button></div>
+          </section>
+
+          <section class="view feature-view" id="categoriesView" hidden>
+            <div class="feature-hero categories-hero">
+              <div><p class="eyebrow">MAKE IT YOURS</p><h1>分类管理 <span>#</span></h1><p>创建符合你生活习惯的收入和支出分类。</p></div>
+              <img src="assets/character-avatar.png" alt="戴红色帽子的长耳角色" />
+              <button class="primary-button hero-action" id="addCategoryBtn"><span>＋</span>新增分类</button>
+            </div>
+            <div class="category-tabs" role="tablist"><button class="active" data-category-tab="expense" role="tab">支出分类 <span id="expenseCategoryCount">0</span></button><button data-category-tab="income" role="tab">收入分类 <span id="incomeCategoryCount">0</span></button></div>
+            <div class="category-manage-grid" id="categoryManageList"></div>
           </section>
         </div>
       </main>
     </div>
+
+    <nav class="mobile-nav" aria-label="手机导航">
+      <button class="mobile-nav-item active" data-mobile-section="overview"><span>⌂</span><small>总览</small></button>
+      <button class="mobile-nav-item" data-mobile-section="transactions"><span>≡</span><small>明细</small></button>
+      <button class="mobile-add" id="mobileAddBillBtn" aria-label="记一笔">＋</button>
+      <button class="mobile-nav-item" data-mobile-section="insights"><span>↗</span><small>分析</small></button>
+      <button class="mobile-nav-item" id="mobileManageBtn"><span>•••</span><small>管理</small></button>
+    </nav>
+    <div class="mobile-manage-menu" id="mobileManageMenu" hidden><button data-manage-section="accounts"><span>▣</span>账户管理</button><button data-manage-section="categories"><span>#</span>分类管理</button></div>
 
     <div class="modal-backdrop" id="billModal" aria-hidden="true">
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -132,9 +211,37 @@
           <div class="type-toggle"><button type="button" class="type-option active" data-type="expense">支出</button><button type="button" class="type-option" data-type="income">收入</button></div>
           <label class="field-label">金额<input name="amount" type="number" min="0.01" step="0.01" placeholder="0.00" required /></label>
           <label class="field-label">分类<select name="category"><option>餐饮美食</option><option>交通出行</option><option>购物消费</option><option>居住生活</option><option>娱乐休闲</option><option>工资收入</option><option>其他</option></select></label>
+          <label class="field-label">账户<select name="account"><option value="未设置账户">未设置账户</option></select></label>
           <label class="field-label">备注<input name="note" type="text" maxlength="40" placeholder="例如：午餐、打车、房租" /></label>
           <label class="field-label">日期<input name="date" type="date" required /></label>
           <div class="form-actions"><button type="button" class="outline-button" id="cancelModal">取消</button><button type="submit" class="primary-button">保存账单 <span>→</span></button></div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="accountModal" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
+        <div class="modal-header"><div><span class="eyebrow">新的钱袋</span><h2 id="accountModalTitle">新增账户</h2></div><button class="close-button" data-close-modal="accountModal" aria-label="关闭">×</button></div>
+        <form id="accountForm">
+          <label class="field-label">账户名称<input name="name" type="text" maxlength="20" placeholder="例如：现金、工资卡" required /></label>
+          <label class="field-label">账户类型<select name="type"><option>现金</option><option>银行卡</option><option>支付平台</option><option>储蓄账户</option><option>其他</option></select></label>
+          <label class="field-label">初始余额<input name="balance" type="number" step="0.01" value="0" required /></label>
+          <label class="field-label">主题颜色<select name="color"><option value="#ffe08c">暖黄色</option><option value="#ff8f80">珊瑚红</option><option value="#b9ddcf">薄荷绿</option><option value="#acd6e8">天空蓝</option><option value="#d4c4e9">淡紫色</option></select></label>
+          <div class="form-actions"><button type="button" class="outline-button" data-close-modal="accountModal">取消</button><button type="submit" class="primary-button">保存账户</button></div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="categoryModal" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
+        <div class="modal-header"><div><span class="eyebrow">新的分类</span><h2 id="categoryModalTitle">新增分类</h2></div><button class="close-button" data-close-modal="categoryModal" aria-label="关闭">×</button></div>
+        <form id="categoryForm">
+          <div class="category-type-toggle"><button type="button" class="active" data-new-category-type="expense">支出分类</button><button type="button" data-new-category-type="income">收入分类</button></div>
+          <input name="type" type="hidden" value="expense" />
+          <label class="field-label">分类名称<input name="name" type="text" maxlength="12" placeholder="例如：宠物、旅行" required /></label>
+          <label class="field-label">图标<select name="icon"><option>●</option><option>♥</option><option>✿</option><option>★</option><option>☕</option><option>♫</option><option>⌂</option><option>↗</option></select></label>
+          <fieldset class="color-field"><legend>选择颜色</legend><label><input type="radio" name="color" value="#ff8f80" checked /><i style="background:#ff8f80"></i></label><label><input type="radio" name="color" value="#ffe08c" /><i style="background:#ffe08c"></i></label><label><input type="radio" name="color" value="#b9ddcf" /><i style="background:#b9ddcf"></i></label><label><input type="radio" name="color" value="#acd6e8" /><i style="background:#acd6e8"></i></label><label><input type="radio" name="color" value="#d4c4e9" /><i style="background:#d4c4e9"></i></label></fieldset>
+          <div class="form-actions"><button type="button" class="outline-button" data-close-modal="categoryModal">取消</button><button type="submit" class="primary-button">保存分类</button></div>
         </form>
       </div>
     </div>

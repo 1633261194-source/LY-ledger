@@ -7,12 +7,18 @@
 在当前目录执行：
 
 ```bash
-node -e "const http=require('http'),fs=require('fs'),path=require('path');http.createServer((req,res)=>{const file=path.join(process.cwd(),req.url==='/'?'index.html':req.url);fs.readFile(file,(e,d)=>{if(e){res.statusCode=404;res.end('Not found')}else{res.end(d)}})}).listen(4173,()=>console.log('listening 4173'))"
+node dev-server.js
 ```
 
 然后打开 `http://localhost:4173`。
 
-账单数据保存在浏览器 `localStorage` 中，点击右上角“记一笔”即可新增收入或支出。
+账单数据保存在浏览器 `localStorage` 中。应用首次打开为空账本，点击右上角“记一笔”即可新增自己的真实收入或支出。
+
+账单明细支持关键词搜索、收支类型筛选、分类筛选、月份筛选、分页、删除记录和导出 CSV。
+
+消费分析会按月份统计支出总额、日均支出、分类占比、每周趋势和分类排行。账户管理支持添加现金、银行卡与支付账户，并根据初始余额及关联账单实时计算余额。分类管理支持分别维护收入、支出分类，新增的账户和分类会立即出现在记账表单中。
+
+手机端可通过底部导航访问总览、明细和分析，并从“管理”菜单进入账户与分类管理。
 
 ## 随时随地使用
 

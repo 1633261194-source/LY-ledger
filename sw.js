@@ -1,5 +1,5 @@
-const CACHE_NAME = 'lingyu-ledger-v2';
-const APP_SHELL = ['./', './index.html', './styles.css', './app.js', './manifest.webmanifest', './icon.svg'];
+const CACHE_NAME = 'lingyu-ledger-v7';
+const APP_SHELL = ['./', './index.html', './styles.css', './app.js', './manifest.webmanifest', './assets/character-avatar.png', './assets/character-main.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));

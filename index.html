@@ -2,7 +2,7 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>玲钰记账 · 个人账单管家</title>
     <meta name="theme-color" content="#f6f8fb" />
     <meta name="description" content="记录收入与支出，掌握每一笔生活开销。" />
@@ -206,15 +206,15 @@
 
     <div class="modal-backdrop" id="billModal" aria-hidden="true">
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-        <div class="modal-header"><div><span class="eyebrow">快速记录</span><h2 id="modalTitle">记一笔账单</h2></div><button class="close-button" id="closeModal" aria-label="关闭">×</button></div>
+        <div class="modal-header"><div><span class="eyebrow" id="billModalEyebrow">快速记录</span><h2 id="modalTitle">记一笔账单</h2></div><button class="close-button" id="closeModal" aria-label="关闭">×</button></div>
         <form id="billForm">
           <div class="type-toggle"><button type="button" class="type-option active" data-type="expense">支出</button><button type="button" class="type-option" data-type="income">收入</button></div>
-          <label class="field-label">金额<input name="amount" type="number" min="0.01" step="0.01" placeholder="0.00" required /></label>
+          <label class="field-label">金额<input name="amount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" required /></label>
           <label class="field-label">分类<select name="category"><option>餐饮美食</option><option>交通出行</option><option>购物消费</option><option>居住生活</option><option>娱乐休闲</option><option>工资收入</option><option>其他</option></select></label>
           <label class="field-label">账户<select name="account"><option value="未设置账户">未设置账户</option></select></label>
           <label class="field-label">备注<input name="note" type="text" maxlength="40" placeholder="例如：午餐、打车、房租" /></label>
           <label class="field-label">日期<input name="date" type="date" required /></label>
-          <div class="form-actions"><button type="button" class="outline-button" id="cancelModal">取消</button><button type="submit" class="primary-button">保存账单 <span>→</span></button></div>
+          <div class="form-actions"><button type="button" class="outline-button" id="cancelModal">取消</button><button type="submit" class="primary-button"><span id="billSubmitLabel">保存账单</span><span>→</span></button></div>
         </form>
       </div>
     </div>

@@ -22,6 +22,7 @@ let monthOffset = 0;
 let detailPage = 1;
 let categoryViewType = 'expense';
 let newCategoryType = 'expense';
+let editingTransactionId = null;
 
 const $ = (selector) => document.querySelector(selector);
 const money = (value) => `${value < 0 ? '-' : ''}¥ ${Math.abs(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -47,6 +48,7 @@ function normalizeTransaction(item, index) {
     icon: item.icon || categoryIconMap[category] || '•',
     iconClass: item.iconClass || categoryClassMap[category] || 'living',
     title: item.title || category,
+    memo: item.memo || (item.title && item.title !== category ? item.title : ''),
     category,
     account,
     rawDate: item.rawDate || legacyDateToISO(item.date, index),
@@ -243,12 +245,20 @@ function renderCategories() {
   document.querySelectorAll('[data-category-tab]').forEach((button) => button.classList.toggle('active', button.dataset.categoryTab === categoryViewType));
 }
 
-function renderBillFormOptions() {
+function renderBillFormOptions(preferredCategory = '', preferredAccount = '') {
   const categorySelect = $('#billForm [name="category"]');
   const accountSelect = $('#billForm [name="account"]');
   const matching = categories.filter((category) => category.type === selectedType);
-  categorySelect.innerHTML = matching.length ? matching.map((category) => `<option value="${escapeHTML(category.name)}">${escapeHTML(category.icon)} ${escapeHTML(category.name)}</option>`).join('') : '<option value="未分类">未分类</option>';
-  accountSelect.innerHTML = '<option value="未设置账户">未设置账户</option>' + accounts.map((account) => `<option value="${escapeHTML(account.name)}">${escapeHTML(account.name)}</option>`).join('');
+  const categoryOptions = matching.map((category) => `<option value="${escapeHTML(category.name)}">${escapeHTML(category.icon)} ${escapeHTML(category.name)}</option>`);
+  if (preferredCategory && !matching.some((category) => category.name === preferredCategory)) {
+    categoryOptions.unshift(`<option value="${escapeHTML(preferredCategory)}">${escapeHTML(preferredCategory)}</option>`);
+  }
+  categorySelect.innerHTML = categoryOptions.length ? categoryOptions.join('') : '<option value="未分类">未分类</option>';
+  const accountOptions = ['未设置账户', ...accounts.map((account) => account.name)];
+  if (preferredAccount && !accountOptions.includes(preferredAccount)) accountOptions.push(preferredAccount);
+  accountSelect.innerHTML = accountOptions.map((account) => `<option value="${escapeHTML(account)}">${escapeHTML(account)}</option>`).join('');
+  if (preferredCategory) categorySelect.value = preferredCategory;
+  if (preferredAccount) accountSelect.value = preferredAccount;
 }
 
 function openNamedModal(id) {
@@ -316,7 +326,7 @@ function renderDetailTransactions() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   detailPage = Math.min(Math.max(detailPage, 1), totalPages);
   const pageItems = filtered.slice((detailPage - 1) * PAGE_SIZE, detailPage * PAGE_SIZE);
-  $('#detailTransactionList').innerHTML = pageItems.map((item) => `<div class="detail-row" data-id="${escapeHTML(item.id)}"><div class="detail-primary">${transactionIcon(item)}<div><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.account)}</small></div></div><div class="detail-category"><span><i class="category-dot ${escapeHTML(item.iconClass)}"></i>${escapeHTML(item.category)}</span><small>${item.amount < 0 ? '日常支出' : '收入入账'}</small></div><time class="detail-date" datetime="${item.rawDate}">${formatDate(item.rawDate)}</time><div class="detail-money ${item.amount > 0 ? 'income' : 'expense'}">${item.amount > 0 ? '+' : '-'}${money(Math.abs(item.amount))}</div><button class="delete-bill" data-delete-id="${escapeHTML(item.id)}" title="删除这笔账单" aria-label="删除 ${escapeHTML(item.title)}">×</button></div>`).join('');
+  $('#detailTransactionList').innerHTML = pageItems.map((item) => `<div class="detail-row" data-id="${escapeHTML(item.id)}"><div class="detail-primary">${transactionIcon(item)}<div><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.account)}</small></div></div><div class="detail-category"><span><i class="category-dot ${escapeHTML(item.iconClass)}"></i>${escapeHTML(item.category)}</span><small>${item.amount < 0 ? '日常支出' : '收入入账'}</small></div><time class="detail-date" datetime="${item.rawDate}">${formatDate(item.rawDate)}</time><div class="detail-money ${item.amount > 0 ? 'income' : 'expense'}">${item.amount > 0 ? '+' : '-'}${money(Math.abs(item.amount))}</div><div class="bill-actions"><button class="edit-bill" data-edit-id="${escapeHTML(item.id)}" title="编辑这笔账单" aria-label="编辑 ${escapeHTML(item.title)}">✎</button><button class="delete-bill" data-delete-id="${escapeHTML(item.id)}" title="删除这笔账单" aria-label="删除 ${escapeHTML(item.title)}">×</button></div></div>`).join('');
 
   $('#emptyState').hidden = filtered.length !== 0;
   $('#pageInfo').textContent = `第 ${detailPage} / ${totalPages} 页`;
@@ -346,19 +356,53 @@ function showToast(message) {
   showToast.timer = window.setTimeout(() => toast.classList.remove('show'), 2400);
 }
 
-function openModal() {
-  renderBillFormOptions();
+function setBillType(type, preferredCategory = '', preferredAccount = '') {
+  selectedType = type;
+  document.querySelectorAll('.type-option').forEach((button) => button.classList.toggle('active', button.dataset.type === type));
+  renderBillFormOptions(preferredCategory, preferredAccount);
+}
+
+function setBillModalMode(isEditing) {
+  $('#billModalEyebrow').textContent = isEditing ? '修改记录' : '快速记录';
+  $('#modalTitle').textContent = isEditing ? '编辑账单' : '记一笔账单';
+  $('#billSubmitLabel').textContent = isEditing ? '保存修改' : '保存账单';
+}
+
+function showBillModal() {
   const modal = $('#billModal');
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
-  $('#billForm [name="date"]').value = new Date().toISOString().slice(0, 10);
   window.setTimeout(() => $('#billForm [name="amount"]').focus(), 100);
+}
+
+function openModal() {
+  editingTransactionId = null;
+  $('#billForm').reset();
+  setBillModalMode(false);
+  setBillType('expense');
+  $('#billForm [name="date"]').value = localDateKey(new Date());
+  showBillModal();
+}
+
+function openEditModal(id) {
+  const item = transactions.find((transaction) => transaction.id === id);
+  if (!item) return;
+  editingTransactionId = item.id;
+  $('#billForm').reset();
+  setBillModalMode(true);
+  setBillType(item.amount < 0 ? 'expense' : 'income', item.category, item.account);
+  $('#billForm [name="amount"]').value = Math.abs(item.amount);
+  $('#billForm [name="note"]').value = item.memo || (item.title !== item.category ? item.title : '');
+  $('#billForm [name="date"]').value = item.rawDate;
+  showBillModal();
 }
 
 function closeModal() {
   $('#billModal').classList.remove('open');
   $('#billModal').setAttribute('aria-hidden', 'true');
   $('#billForm').reset();
+  editingTransactionId = null;
+  setBillModalMode(false);
 }
 
 function updateMonthLabel() {
@@ -422,9 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeModal(); });
 
   document.querySelectorAll('.type-option').forEach((button) => button.addEventListener('click', () => {
-    selectedType = button.dataset.type;
-    document.querySelectorAll('.type-option').forEach((item) => item.classList.toggle('active', item === button));
-    renderBillFormOptions();
+    setBillType(button.dataset.type);
   }));
 
   $('#billForm').addEventListener('submit', (event) => {
@@ -434,21 +476,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!amount || amount <= 0) return;
     const category = form.get('category');
     const categoryConfig = findCategory(category, selectedType);
-    transactions.unshift({
-      id: makeId(),
+    const memo = String(form.get('note') || '').trim();
+    const transaction = {
+      id: editingTransactionId || makeId(),
       icon: categoryConfig?.icon || categoryIconMap[category] || '•',
       iconClass: categoryClassMap[category] || 'living',
-      title: form.get('note').trim() || category,
+      title: memo || category,
+      memo,
       category,
       account: form.get('account') || '未设置账户',
       rawDate: form.get('date'),
       amount: selectedType === 'expense' ? -amount : amount
-    });
+    };
+    const editingIndex = transactions.findIndex((item) => item.id === editingTransactionId);
+    const wasEditing = editingIndex >= 0;
+    if (wasEditing) transactions.splice(editingIndex, 1, transaction);
+    else transactions.unshift(transaction);
     saveTransactions();
     detailPage = 1;
     renderAllTransactions();
     closeModal();
-    showToast('账单已保存，小狗记下啦');
+    showToast(wasEditing ? '账单已修改' : '账单已保存，小狗记下啦');
   });
 
   ['billSearch', 'typeFilter', 'categoryFilter', 'detailMonthFilter'].forEach((id) => {
@@ -481,6 +529,11 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('全部账单已清空');
   });
   $('#detailTransactionList').addEventListener('click', (event) => {
+    const editButton = event.target.closest('[data-edit-id]');
+    if (editButton) {
+      openEditModal(editButton.dataset.editId);
+      return;
+    }
     const button = event.target.closest('[data-delete-id]');
     if (!button) return;
     const item = transactions.find((bill) => bill.id === button.dataset.deleteId);

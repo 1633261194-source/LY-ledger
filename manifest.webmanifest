@@ -4,8 +4,8 @@
   "description": "记录收入与支出，掌握每一笔生活开销。",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f6f8fb",
-  "theme_color": "#172238",
+  "background_color": "#f0f7f4",
+  "theme_color": "#f0f7f4",
   "lang": "zh-CN",
   "icons": [
     { "src": "assets/character-avatar.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }

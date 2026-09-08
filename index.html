@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>玲钰记账 · 个人账单管家</title>
-    <meta name="theme-color" content="#f6f8fb" />
+    <meta name="theme-color" content="#f0f7f4" />
     <meta name="description" content="记录收入与支出，掌握每一笔生活开销。" />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="assets/character-avatar.png" type="image/png" />
@@ -33,7 +33,7 @@
         </nav>
 
         <div class="sidebar-bottom">
-          <div class="sync-status"><span class="status-dot"></span><span>数据已同步</span><span class="sync-time">刚刚</span></div>
+          <div class="sync-status"><span class="status-dot"></span><span>账本保存在本机</span></div>
           <button class="profile-button" id="profileBtn"><span class="avatar">林</span><span class="profile-copy"><strong>林小满</strong><small>个人账户</small></span><span class="profile-more">•••</span></button>
         </div>
       </aside>
@@ -44,7 +44,7 @@
           <div class="breadcrumb"><span>工作台</span><span class="breadcrumb-separator">/</span><strong id="currentSection">总览</strong></div>
           <div class="top-actions">
             <button class="icon-button" title="搜索账单" aria-label="搜索账单" id="searchToggle">⌕</button>
-            <button class="icon-button notification" title="通知" aria-label="通知">♢<span></span></button>
+            <button class="icon-button sound-toggle" id="soundToggle" type="button" title="关闭音效" aria-label="关闭音效" aria-pressed="true"><img id="soundIcon" src="assets/volume-2.svg" alt="" /></button>
             <button class="primary-button" id="addBillBtn"><span class="plus">＋</span>记一笔</button>
           </div>
         </header>
@@ -57,8 +57,8 @@
               <h1>该省省该花花 <span class="wave">♡</span></h1>
               <p class="intro-copy">小狗管家已经帮你整理好本月账单啦。</p>
             </div>
-            <img class="welcome-dog" src="assets/character-main.png" alt="戴红色帽子的长耳角色" />
-            <div class="month-switcher"><button class="chevron" id="prevMonth" aria-label="上个月">‹</button><button class="month-label" id="monthLabel">2024年06月</button><button class="chevron" id="nextMonth" aria-label="下个月">›</button></div>
+            <img class="welcome-dog" src="assets/character-avatar.png" alt="戴红色帽子的长耳角色" />
+            <div class="month-switcher"><button class="chevron" id="prevMonth" aria-label="上个月">‹</button><button class="month-label" id="monthLabel" type="button" aria-haspopup="dialog" aria-controls="overviewDateModal" title="选择年月日">选择日期</button><button class="chevron" id="nextMonth" aria-label="下个月">›</button></div>
           </section>
 
           <section class="metric-grid" aria-label="财务概览">
@@ -203,6 +203,16 @@
       <button class="mobile-nav-item" id="mobileManageBtn"><span>•••</span><small>管理</small></button>
     </nav>
     <div class="mobile-manage-menu" id="mobileManageMenu" hidden><button data-manage-section="accounts"><span>▣</span>账户管理</button><button data-manage-section="categories"><span>#</span>分类管理</button></div>
+
+    <div class="modal-backdrop" id="overviewDateModal" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="overviewDateTitle">
+        <div class="modal-header"><h2 id="overviewDateTitle">选择日期</h2><button class="close-button" data-close-modal="overviewDateModal" aria-label="关闭日期选择">×</button></div>
+        <form id="overviewDateForm">
+          <label class="field-label">年月日<input id="overviewDateInput" name="date" type="date" min="1900-01-01" max="9999-12-31" required /></label>
+          <div class="form-actions"><button type="button" class="outline-button" id="overviewTodayBtn">今天</button><button type="button" class="outline-button" data-close-modal="overviewDateModal">取消</button><button type="submit" class="primary-button">确定</button></div>
+        </form>
+      </div>
+    </div>
 
     <div class="modal-backdrop" id="billModal" aria-hidden="true">
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">

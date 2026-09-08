@@ -19,15 +19,55 @@ const defaultCategories = [
 
 let selectedType = 'expense';
 let monthOffset = 0;
+let overviewDay = new Date().getDate();
 let detailPage = 1;
 let categoryViewType = 'expense';
 let newCategoryType = 'expense';
 let editingTransactionId = null;
+let audioContext;
+let soundEnabled = localStorage.getItem('lingyu-ledger-sound') !== 'off';
+let lastTapTime = -Infinity;
+
+function renderSoundToggle() {
+  const button = $('#soundToggle');
+  button.setAttribute('aria-pressed', String(soundEnabled));
+  button.setAttribute('aria-label', soundEnabled ? '关闭音效' : '开启音效');
+  button.title = soundEnabled ? '关闭音效' : '开启音效';
+  $('#soundIcon').src = soundEnabled ? 'assets/volume-2.svg' : 'assets/volume-x.svg';
+}
 
 const $ = (selector) => document.querySelector(selector);
 const money = (value) => `${value < 0 ? '-' : ''}¥ ${Math.abs(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const escapeHTML = (value = '') => String(value).replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
 const makeId = () => globalThis.crypto?.randomUUID?.() || `bill-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+function playSound(kind = 'tap') {
+  if (!soundEnabled) return;
+  try {
+    audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
+    const now = audioContext.currentTime;
+    if (kind === 'tap' && now - lastTapTime < .065) return;
+    lastTapTime = now;
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    const settings = kind === 'success'
+      ? { start: 523.25, end: 783.99, duration: .16, volume: .045 }
+      : kind === 'delete'
+        ? { start: 260, end: 170, duration: .12, volume: .035 }
+        : { start: 440, end: 520, duration: .07, volume: .025 };
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(settings.start, now);
+    oscillator.frequency.exponentialRampToValueAtTime(settings.end, now + settings.duration);
+    gain.gain.setValueAtTime(.001, now);
+    gain.gain.linearRampToValueAtTime(settings.volume, now + .006);
+    gain.gain.exponentialRampToValueAtTime(.001, now + settings.duration);
+    oscillator.connect(gain).connect(audioContext.destination);
+    oscillator.start(now);
+    oscillator.stop(now + settings.duration);
+    oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
+  } catch { /* Sound is an enhancement; the app remains usable when audio is blocked. */ }
+}
 
 function legacyDateToISO(value, index) {
   if (/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return value;
@@ -272,6 +312,7 @@ function closeNamedModal(id) {
   modal.classList.remove('open');
   modal.setAttribute('aria-hidden', 'true');
   modal.querySelector('form')?.reset();
+  if (id === 'overviewDateModal') $('#monthLabel').focus({ preventScroll: true });
 }
 
 function transactionIcon(item) {
@@ -326,7 +367,7 @@ function renderDetailTransactions() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   detailPage = Math.min(Math.max(detailPage, 1), totalPages);
   const pageItems = filtered.slice((detailPage - 1) * PAGE_SIZE, detailPage * PAGE_SIZE);
-  $('#detailTransactionList').innerHTML = pageItems.map((item) => `<div class="detail-row" data-id="${escapeHTML(item.id)}"><div class="detail-primary">${transactionIcon(item)}<div><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.account)}</small></div></div><div class="detail-category"><span><i class="category-dot ${escapeHTML(item.iconClass)}"></i>${escapeHTML(item.category)}</span><small>${item.amount < 0 ? '日常支出' : '收入入账'}</small></div><time class="detail-date" datetime="${item.rawDate}">${formatDate(item.rawDate)}</time><div class="detail-money ${item.amount > 0 ? 'income' : 'expense'}">${item.amount > 0 ? '+' : '-'}${money(Math.abs(item.amount))}</div><div class="bill-actions"><button class="edit-bill" data-edit-id="${escapeHTML(item.id)}" title="编辑这笔账单" aria-label="编辑 ${escapeHTML(item.title)}">✎</button><button class="delete-bill" data-delete-id="${escapeHTML(item.id)}" title="删除这笔账单" aria-label="删除 ${escapeHTML(item.title)}">×</button></div></div>`).join('');
+  $('#detailTransactionList').innerHTML = pageItems.map((item) => `<div class="detail-row" data-id="${escapeHTML(item.id)}"><div class="detail-primary">${transactionIcon(item)}<div><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.account)}</small></div></div><div class="detail-category"><span><i class="category-dot ${escapeHTML(item.iconClass)}"></i>${escapeHTML(item.category)}</span><small>${item.amount < 0 ? '日常支出' : '收入入账'}</small></div><time class="detail-date" datetime="${item.rawDate}">${formatDate(item.rawDate)}</time><div class="detail-money ${item.amount > 0 ? 'income' : 'expense'}">${item.amount > 0 ? '+' : '-'}${money(Math.abs(item.amount))}</div><div class="bill-actions"><button class="edit-bill" data-edit-id="${escapeHTML(item.id)}" title="编辑这笔账单" aria-label="编辑 ${escapeHTML(item.title)}"><img src="assets/pencil.svg" alt="" /></button><button class="delete-bill" data-delete-id="${escapeHTML(item.id)}" title="删除这笔账单" aria-label="删除 ${escapeHTML(item.title)}">×</button></div></div>`).join('');
 
   $('#emptyState').hidden = filtered.length !== 0;
   $('#pageInfo').textContent = `第 ${detailPage} / ${totalPages} 页`;
@@ -352,6 +393,8 @@ function showToast(message) {
   const toast = $('#toast');
   toast.textContent = message;
   toast.classList.add('show');
+  if (/已删除|已清空/.test(message)) playSound('delete');
+  else if (/已保存|已修改|已添加|已导出/.test(message)) playSound('success');
   window.clearTimeout(showToast.timer);
   showToast.timer = window.setTimeout(() => toast.classList.remove('show'), 2400);
 }
@@ -407,7 +450,22 @@ function closeModal() {
 
 function updateMonthLabel() {
   const base = selectedMonthDate();
-  $('#monthLabel').textContent = `${base.getFullYear()}年${String(base.getMonth() + 1).padStart(2, '0')}月`;
+  const lastDay = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+  base.setDate(Math.min(overviewDay, lastDay));
+  $('#monthLabel').textContent = formatDate(localDateKey(base));
+  $('#overviewDateInput').value = localDateKey(base);
+}
+
+function applyOverviewDate(value) {
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime()) || localDateKey(date) !== value) return false;
+  const now = new Date();
+  monthOffset = (date.getFullYear() - now.getFullYear()) * 12 + date.getMonth() - now.getMonth();
+  overviewDay = date.getDate();
+  updateMonthLabel();
+  renderOverviewSummary();
+  renderInsight();
+  return true;
 }
 
 function setView(section, focusSearch = false) {
@@ -454,16 +512,51 @@ function exportFilteredBills() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+  if ('serviceWorker' in navigator) {
+    // Refresh updated assets after the current form is closed, never mid-entry.
+    let pendingUpdate = false;
+    let hadController = Boolean(navigator.serviceWorker.controller);
+    const refreshWhenIdle = () => {
+      if (!pendingUpdate || document.querySelector('.modal-backdrop.open')) return;
+      window.location.reload();
+    };
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController) { hadController = true; return; }
+      pendingUpdate = true;
+      refreshWhenIdle();
+    });
+    document.addEventListener('click', () => window.setTimeout(refreshWhenIdle, 0));
+    document.addEventListener('keydown', () => window.setTimeout(refreshWhenIdle, 0));
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(() => {});
+  }
   renderAllTransactions();
   updateMonthLabel();
+
+  renderSoundToggle();
+  $('#soundToggle').addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem('lingyu-ledger-sound', soundEnabled ? 'on' : 'off');
+    renderSoundToggle();
+    if (soundEnabled) playSound('success');
+  });
+  document.addEventListener('click', (event) => {
+    const control = event.target.closest('button');
+    if (!control || control.disabled || control.id === 'soundToggle') return;
+    if (control.type !== 'submit' || !control.form) playSound('tap');
+    control.classList.add('is-pressed');
+    window.setTimeout(() => control.classList.remove('is-pressed'), 160);
+  }, { capture: true });
 
   $('#addBillBtn').addEventListener('click', openModal);
   $('#mobileAddBillBtn').addEventListener('click', openModal);
   $('#closeModal').addEventListener('click', closeModal);
   $('#cancelModal').addEventListener('click', closeModal);
   $('#billModal').addEventListener('click', (event) => { if (event.target.id === 'billModal') closeModal(); });
-  document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeModal(); });
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    if ($('#overviewDateModal').classList.contains('open')) closeNamedModal('overviewDateModal');
+    else closeModal();
+  });
 
   document.querySelectorAll('.type-option').forEach((button) => button.addEventListener('click', () => {
     setBillType(button.dataset.type);
@@ -544,6 +637,25 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('账单已删除');
   });
 
+  $('#monthLabel').addEventListener('click', () => {
+    updateMonthLabel();
+    openNamedModal('overviewDateModal');
+    const input = $('#overviewDateInput');
+    input.focus({ preventScroll: true });
+    try { input.showPicker?.(); } catch { /* Native date input remains available. */ }
+  });
+  $('#overviewDateInput').addEventListener('click', (event) => {
+    try { event.target.showPicker?.(); } catch { /* Allow manual date entry. */ }
+  });
+  $('#overviewDateForm').addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!event.target.reportValidity()) return;
+    if (applyOverviewDate($('#overviewDateInput').value)) closeNamedModal('overviewDateModal');
+  });
+  $('#overviewTodayBtn').addEventListener('click', () => {
+    applyOverviewDate(localDateKey(new Date()));
+    closeNamedModal('overviewDateModal');
+  });
   $('#prevMonth').addEventListener('click', () => { monthOffset -= 1; updateMonthLabel(); renderOverviewSummary(); renderInsight(); });
   $('#nextMonth').addEventListener('click', () => { monthOffset += 1; updateMonthLabel(); renderOverviewSummary(); renderInsight(); });
   $('#searchToggle').addEventListener('click', () => setView('transactions', true));
@@ -644,7 +756,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.querySelectorAll('[data-close-modal]').forEach((button) => button.addEventListener('click', () => closeNamedModal(button.dataset.closeModal)));
-  ['accountModal', 'categoryModal'].forEach((id) => $(`#${id}`).addEventListener('click', (event) => { if (event.target.id === id) closeNamedModal(id); }));
+  ['accountModal', 'categoryModal', 'overviewDateModal'].forEach((id) => $(`#${id}`).addEventListener('click', (event) => { if (event.target.id === id) closeNamedModal(id); }));
   $('#mobileManageBtn').addEventListener('click', (event) => {
     event.stopPropagation();
     $('#mobileManageMenu').hidden = !$('#mobileManageMenu').hidden;

@@ -136,7 +136,7 @@ button, .panel, .metric-card, .account-card, .category-manage-card, .management-
 .chevron { width: 25px; height: 25px; border-radius: 5px; font-size: 19px; }
 .chevron:hover { background: var(--mint); }
 
-.metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+.metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
 .metric-card { min-height: 137px; position: relative; overflow: hidden; padding: 16px 17px 14px; background: var(--paper); border: 2px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); }
 .metric-card, .account-card, .category-manage-card { transition: transform .18s ease, box-shadow .18s ease; }
 @media (hover: hover) and (pointer: fine) {
@@ -162,6 +162,7 @@ button, .panel, .metric-card, .account-card, .category-manage-card, .management-
 .mini-progress i { display: block; width: 70%; height: 100%; background: var(--lilac); }
 
 .main-grid, .lower-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(330px, 1fr); gap: 18px; margin-bottom: 18px; }
+.main-grid { grid-template-columns: minmax(0, 1fr); }
 .panel { position: relative; padding: 19px 21px; background: var(--paper); border: 2px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); }
 .panel-header { display: flex; align-items: flex-start; justify-content: space-between; }
 .panel-header h2 { margin: 0; font-size: 15px; font-weight: 800; }
@@ -421,7 +422,7 @@ button, .panel, .metric-card, .account-card, .category-manage-card, .management-
   .sidebar { width: 210px; }
   .topbar { padding: 0 28px; }
   .content-wrap { padding-right: 28px; padding-left: 28px; }
-  .metric-grid { grid-template-columns: repeat(2, 1fr); }
+  .metric-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .main-grid, .lower-grid { grid-template-columns: 1fr; }
   .welcome-dog { right: 125px; }
   .filter-bar { grid-template-columns: minmax(200px, 1.5fr) repeat(2, minmax(120px, 1fr)) 36px; }
@@ -525,6 +526,45 @@ button, .panel, .metric-card, .account-card, .category-manage-card, .management-
   .feature-toolbar { align-items: flex-start; gap: 10px; }
   .feature-toolbar select { min-width: 120px; }
   .category-manage-grid { grid-template-columns: 1fr; }
+}
+
+.daily-ledger { margin: 24px 0; padding: 18px 0; border-block: 2px solid #b6cdc0; }
+.daily-header, .daily-list-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.daily-header h2 { margin: 0; font-size: 18px; }
+.daily-date-controls { display: flex; align-items: center; gap: 6px; max-width: 100%; }
+.daily-date-controls .chevron { width: 36px; height: 40px; flex-shrink: 0; }
+.daily-date-controls .outline-button { padding-inline: 12px; flex-shrink: 0; }
+.daily-date-controls input, .detail-date-field input { min-width: 0; width: 152px; min-height: 40px; padding: 6px; border: 1px solid #8aa799; border-radius: 6px; background: var(--paper); color: var(--ink); font: inherit; font-size: 16px; }
+.daily-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+.daily-summary > div { min-width: 0; padding: 14px 16px; border-left: 4px solid; }
+.daily-summary .daily-expense { background: #ffebef; border-color: #cc677c; }
+.daily-summary .daily-income { background: #e1f2e8; border-color: #438667; }
+.daily-summary .daily-balance { background: #e1f0f8; border-color: #54859d; }
+.daily-summary span { display: block; font-size: 12px; color: var(--muted); }
+.daily-summary strong { display: block; margin-top: 8px; font-size: 24px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.daily-list-heading > span { font-size: 12px; color: var(--muted); }
+.daily-ledger .transaction-row { grid-template-columns: 36px minmax(0, 1fr) minmax(70px, auto); }
+.daily-ledger .transaction-copy strong { overflow-wrap: anywhere; }
+.daily-empty { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 18px 0; color: var(--muted); font-size: 13px; }
+.daily-empty[hidden] { display: none; }
+.detail-date-field { grid-column: 1 / span 2; justify-self: start; }
+.detail-date-field input { border: 0; background: transparent; }
+@media (min-width: 1101px) {
+  .filter-bar .reset-filter { grid-column: -2 / -1; grid-row: 1; }
+}
+@media (max-width: 1100px) {
+  .detail-date-field { grid-column: 1 / -1; justify-self: stretch; }
+  .detail-date-field input { width: 100%; }
+  .filter-bar .reset-filter { grid-column: 2; grid-row: 3; width: 40px; justify-self: end; }
+}
+@media (max-width: 700px) {
+  .daily-header { gap: 10px; }
+  .daily-date-controls { width: 100%; gap: 4px; }
+  .daily-date-controls input { flex: 1; width: 120px; }
+  .daily-summary { gap: 6px; }
+  .daily-summary > div { padding: 12px 7px; border-left-width: 3px; }
+  .daily-summary strong { font-size: 17px; }
+  .daily-ledger .transaction-row { grid-template-columns: 31px minmax(0, 1fr) minmax(70px, 40%); }
 }
 
 /* Shared finishing layer for the pastel ledger and its touch controls. */
@@ -636,6 +676,7 @@ button:disabled { cursor: default; opacity: .4; }
   .month-switcher { height: 38px; left: 16px; bottom: 14px; }
   .chevron { width: 34px; height: 34px; }
   .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .metric-grid > .metric-card:first-child { grid-column: 1 / -1; }
   .metric-card { min-height: 132px; padding: 11px; }
   .metric-value { font-size: 22px; }
   .metric-foot { font-size: 10px; }

@@ -61,6 +61,26 @@
             <div class="month-switcher"><button class="chevron" id="prevMonth" aria-label="上个月">‹</button><button class="month-label" id="monthLabel" type="button" aria-haspopup="dialog" aria-controls="overviewDateModal" title="选择年月日">选择日期</button><button class="chevron" id="nextMonth" aria-label="下个月">›</button></div>
           </section>
 
+          <section class="daily-ledger" aria-labelledby="dailyTitle">
+            <div class="daily-header">
+              <h2 id="dailyTitle">每日账单</h2>
+              <div class="daily-date-controls">
+                <button class="chevron" id="prevDayBtn" type="button" title="前一天" aria-label="前一天">‹</button>
+                <input id="dailyDateInput" type="date" min="1900-01-01" max="9999-12-31" required aria-label="每日账单日期" />
+                <button class="chevron" id="nextDayBtn" type="button" title="后一天" aria-label="后一天">›</button>
+                <button class="outline-button" id="dailyTodayBtn" type="button">今天</button>
+              </div>
+            </div>
+            <div class="daily-summary" aria-live="polite">
+              <div class="daily-expense"><span>当日支出</span><strong id="dailyExpense">¥ 0.00</strong></div>
+              <div class="daily-income"><span>当日收入</span><strong id="dailyIncome">¥ 0.00</strong></div>
+              <div class="daily-balance"><span>当日结余</span><strong id="dailyBalance">¥ 0.00</strong></div>
+            </div>
+            <div class="daily-list-heading"><span id="dailyCount">共 0 笔账单</span><button class="text-button" id="viewDailyBillsBtn" type="button">查看当日明细 <span>→</span></button></div>
+            <div id="dailyTransactionList" class="transaction-list"></div>
+            <div id="dailyEmpty" class="daily-empty"><span>当天还没有账单</span><button class="text-button" id="addDailyBillBtn" type="button">记一笔</button></div>
+          </section>
+
           <section class="metric-grid" aria-label="财务概览">
             <article class="metric-card accent-blue">
               <div class="metric-top"><span class="metric-label">本月结余</span><span class="metric-icon">✿</span></div>
@@ -77,11 +97,6 @@
               <div class="metric-value" id="incomeValue">¥ 0<span>.00</span></div>
               <div class="metric-foot"><span>根据你的真实账单计算</span><span class="sparkline green">▁▁▁▁▁▁▁</span></div>
             </article>
-            <article class="metric-card accent-purple">
-              <div class="metric-top"><span class="metric-label">储蓄率</span><span class="metric-icon">♡</span></div>
-              <div class="metric-value" id="savingsRateValue">0<span class="unit">%</span></div>
-              <div class="metric-foot"><span>收入减去支出</span><span class="mini-progress"><i id="savingsProgress" style="width:0"></i></span></div>
-            </article>
           </section>
 
           <section class="main-grid">
@@ -94,11 +109,6 @@
               </div>
             </article>
 
-            <article class="panel budget-panel">
-              <div class="panel-header"><div><h2>预算执行</h2><p>本月各分类预算</p></div><button class="text-button" id="editBudgetBtn">编辑预算 <span>→</span></button></div>
-              <div class="budget-empty"><img src="assets/character-avatar.png" alt="" /><strong>还没有设置预算</strong><span>从真实生活出发，给每类支出定个小目标。</span></div>
-              <button class="outline-button" id="viewBudgetBtn">设置第一份预算 <span>→</span></button>
-            </article>
           </section>
 
           <section class="lower-grid">
@@ -142,6 +152,7 @@
                 <label class="select-field"><span>收支</span><select id="typeFilter"><option value="all">全部类型</option><option value="expense">只看支出</option><option value="income">只看收入</option></select></label>
                 <label class="select-field"><span>分类</span><select id="categoryFilter"><option value="all">全部分类</option></select></label>
                 <label class="select-field"><span>月份</span><select id="detailMonthFilter"><option value="all">全部月份</option></select></label>
+                <label class="select-field detail-date-field"><span>日期</span><input id="detailDateFilter" type="date" min="1900-01-01" max="9999-12-31" aria-label="筛选账单日期" /></label>
                 <button class="reset-filter" id="resetFiltersBtn" title="清除筛选">↺</button>
               </div>
 

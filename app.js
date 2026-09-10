@@ -151,6 +151,36 @@ function metricHTML(value) {
   return `${value < 0 ? '-' : ''}¥ ${whole}<span>.${decimals}</span>`;
 }
 
+function selectedOverviewDate() {
+  const date = selectedMonthDate();
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  date.setDate(Math.min(overviewDay, lastDay));
+  return date;
+}
+
+function renderDailyLedger() {
+  const date = localDateKey(selectedOverviewDate());
+  const records = transactions.filter((item) => item.rawDate === date);
+  // Sum integer cents so decimal amounts stay exact in the daily totals.
+  const income = records.filter((item) => item.amount > 0).reduce((sum, item) => sum + Math.round(item.amount * 100), 0);
+  const expense = records.filter((item) => item.amount < 0).reduce((sum, item) => sum + Math.round(Math.abs(item.amount) * 100), 0);
+  $('#dailyDateInput').value = date;
+  $('#prevDayBtn').disabled = date <= '1900-01-01';
+  $('#nextDayBtn').disabled = date >= '9999-12-31';
+  $('#dailyExpense').textContent = money(expense / 100);
+  $('#dailyIncome').textContent = money(income / 100);
+  $('#dailyBalance').textContent = money((income - expense) / 100);
+  $('#dailyCount').textContent = `共 ${records.length} 笔账单${records.length > 5 ? ' · 最近 5 笔' : ''}`;
+  $('#dailyEmpty').hidden = records.length > 0;
+  $('#dailyTransactionList').innerHTML = records.slice(0, 5).map((item) => `<div class="transaction-row">${transactionIcon(item)}<div class="transaction-copy"><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.category)} · ${escapeHTML(item.account)}</small></div><div class="transaction-amount ${item.amount < 0 ? 'expense' : 'income'}">${item.amount < 0 ? '-' : '+'}${money(Math.abs(item.amount))}</div></div>`).join('');
+}
+
+function shiftOverviewDay(offset) {
+  const date = selectedOverviewDate();
+  date.setDate(date.getDate() + offset);
+  applyOverviewDate(localDateKey(date));
+}
+
 function renderChart() {
   const today = new Date();
   const days = Array.from({ length: 7 }, (_, index) => {
@@ -177,12 +207,9 @@ function renderOverviewSummary() {
   const income = monthRecords.filter((item) => item.amount > 0).reduce((sum, item) => sum + item.amount, 0);
   const expense = Math.abs(monthRecords.filter((item) => item.amount < 0).reduce((sum, item) => sum + item.amount, 0));
   const balance = income - expense;
-  const savingsRate = income > 0 ? Math.round(balance / income * 100) : 0;
   $('#incomeValue').innerHTML = metricHTML(income);
   $('#expenseValue').innerHTML = metricHTML(expense);
   $('#balanceValue').innerHTML = metricHTML(balance);
-  $('#savingsRateValue').innerHTML = `${savingsRate}<span class="unit">%</span>`;
-  $('#savingsProgress').style.width = `${Math.min(100, Math.max(0, savingsRate))}%`;
 }
 
 function renderInsight() {
@@ -203,6 +230,7 @@ function renderInsight() {
 
 function renderDashboard() {
   renderChart();
+  renderDailyLedger();
   renderOverviewSummary();
   renderInsight();
 }
@@ -347,10 +375,12 @@ function getFilteredTransactions() {
   const type = $('#typeFilter').value;
   const category = $('#categoryFilter').value;
   const month = $('#detailMonthFilter').value;
+  const date = $('#detailDateFilter').value;
   return [...transactions]
     .filter((item) => type === 'all' || (type === 'income' ? item.amount > 0 : item.amount < 0))
     .filter((item) => category === 'all' || item.category === category)
     .filter((item) => month === 'all' || item.rawDate.startsWith(month))
+    .filter((item) => !date || item.rawDate === date)
     .filter((item) => !query || `${item.title} ${item.category} ${item.account}`.toLocaleLowerCase('zh-CN').includes(query))
     .sort((a, b) => b.rawDate.localeCompare(a.rawDate) || b.id.localeCompare(a.id));
 }
@@ -373,8 +403,8 @@ function renderDetailTransactions() {
   $('#pageInfo').textContent = `第 ${detailPage} / ${totalPages} 页`;
   $('#prevPageBtn').disabled = detailPage <= 1;
   $('#nextPageBtn').disabled = detailPage >= totalPages;
-  const activeFilters = [$('#typeFilter').value !== 'all', $('#categoryFilter').value !== 'all', $('#detailMonthFilter').value !== 'all', Boolean($('#billSearch').value.trim())].filter(Boolean).length;
-  $('#filterHint').textContent = activeFilters ? `已启用 ${activeFilters} 个筛选条件` : '按时间从近到远';
+  const activeFilters = [$('#typeFilter').value !== 'all', $('#categoryFilter').value !== 'all', $('#detailMonthFilter').value !== 'all', Boolean($('#billSearch').value.trim()), Boolean($('#detailDateFilter').value)].filter(Boolean).length;
+  $('#filterHint').textContent = $('#detailDateFilter').value ? `${formatDate($('#detailDateFilter').value)} · 已启用 ${activeFilters} 个筛选条件` : activeFilters ? `已启用 ${activeFilters} 个筛选条件` : '按时间从近到远';
 }
 
 function renderAllTransactions() {
@@ -449,16 +479,15 @@ function closeModal() {
 }
 
 function updateMonthLabel() {
-  const base = selectedMonthDate();
-  const lastDay = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
-  base.setDate(Math.min(overviewDay, lastDay));
+  const base = selectedOverviewDate();
   $('#monthLabel').textContent = formatDate(localDateKey(base));
   $('#overviewDateInput').value = localDateKey(base);
+  renderDailyLedger();
 }
 
 function applyOverviewDate(value) {
   const date = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(date.getTime()) || localDateKey(date) !== value) return false;
+  if (Number.isNaN(date.getTime()) || localDateKey(date) !== value || value < '1900-01-01' || value > '9999-12-31') return false;
   const now = new Date();
   monthOffset = (date.getFullYear() - now.getFullYear()) * 12 + date.getMonth() - now.getMonth();
   overviewDay = date.getDate();
@@ -592,9 +621,14 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast(wasEditing ? '账单已修改' : '账单已保存，小狗记下啦');
   });
 
-  ['billSearch', 'typeFilter', 'categoryFilter', 'detailMonthFilter'].forEach((id) => {
+  ['billSearch', 'typeFilter', 'categoryFilter', 'detailMonthFilter', 'detailDateFilter'].forEach((id) => {
     const eventName = id === 'billSearch' ? 'input' : 'change';
-    $(`#${id}`).addEventListener(eventName, () => { detailPage = 1; renderDetailTransactions(); });
+    $(`#${id}`).addEventListener(eventName, () => {
+      if (id === 'detailDateFilter' && $('#detailDateFilter').value) $('#detailMonthFilter').value = 'all';
+      if (id === 'detailMonthFilter') $('#detailDateFilter').value = '';
+      detailPage = 1;
+      renderDetailTransactions();
+    });
   });
 
   $('#resetFiltersBtn').addEventListener('click', () => {
@@ -602,6 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('#typeFilter').value = 'all';
     $('#categoryFilter').value = 'all';
     $('#detailMonthFilter').value = 'all';
+    $('#detailDateFilter').value = '';
     detailPage = 1;
     renderDetailTransactions();
     showToast('筛选条件已清除');
@@ -637,6 +672,26 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('账单已删除');
   });
 
+  $('#dailyDateInput').addEventListener('change', (event) => {
+    if (!applyOverviewDate(event.target.value)) renderDailyLedger();
+  });
+  $('#prevDayBtn').addEventListener('click', () => shiftOverviewDay(-1));
+  $('#nextDayBtn').addEventListener('click', () => shiftOverviewDay(1));
+  $('#dailyTodayBtn').addEventListener('click', () => applyOverviewDate(localDateKey(new Date())));
+  $('#viewDailyBillsBtn').addEventListener('click', () => {
+    $('#billSearch').value = '';
+    $('#typeFilter').value = 'all';
+    $('#categoryFilter').value = 'all';
+    $('#detailMonthFilter').value = 'all';
+    $('#detailDateFilter').value = localDateKey(selectedOverviewDate());
+    detailPage = 1;
+    setView('transactions');
+  });
+  $('#addDailyBillBtn').addEventListener('click', () => {
+    openModal();
+    $('#billForm [name="date"]').value = localDateKey(selectedOverviewDate());
+  });
+
   $('#monthLabel').addEventListener('click', () => {
     updateMonthLabel();
     openNamedModal('overviewDateModal');
@@ -660,8 +715,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#nextMonth').addEventListener('click', () => { monthOffset += 1; updateMonthLabel(); renderOverviewSummary(); renderInsight(); });
   $('#searchToggle').addEventListener('click', () => setView('transactions', true));
   $('#viewAllBtn').addEventListener('click', () => setView('transactions'));
-  $('#editBudgetBtn').addEventListener('click', () => showToast('预算编辑即将上线'));
-  $('#viewBudgetBtn').addEventListener('click', () => showToast('预算设置功能即将上线'));
   $('#viewInsightBtn').addEventListener('click', () => setView('insights'));
   $('#profileBtn').addEventListener('click', () => showToast('个人设置即将上线'));
 

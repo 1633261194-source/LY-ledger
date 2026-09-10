@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lingyu-ledger-v16';
+const CACHE_NAME = 'lingyu-ledger-v19';
 const APP_SHELL = ['./', './index.html', './styles.css', './app.js', './manifest.webmanifest', './assets/character-avatar.png', './assets/character-main.png', './assets/volume-2.svg', './assets/volume-x.svg', './assets/pencil.svg'];
 
 self.addEventListener('install', (event) => {
